@@ -3,6 +3,7 @@
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_ttf.h"
 #include "function_snake.h"
+
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
@@ -78,7 +79,38 @@ void Game_Quit()
     TTF_Quit();
     SDL_Quit();
 }
+void renderRect(int x, int y) {
+    SDL_Rect pos;
+    pos.x = x;
+    pos.y = y;
+    pos.w = 20;
+    pos.h = 20;
+    SDL_SetRenderDrawColor(ren, 0x00, 0xFF, 0x00, 0x00);
+    SDL_RenderFillRect(ren, &pos);
+    SDL_RenderPresent(ren);
+}
 
+void renderBlackRect(int x, int y) {
+    SDL_Rect pos;
+    pos.x = x;
+    pos.y = y;
+    pos.w = 20;
+    pos.h = 20;
+    SDL_SetRenderDrawColor(ren, 0x00, 0x00, 0x00, 0x00);
+    SDL_RenderFillRect(ren, &pos);
+    SDL_RenderPresent(ren);
+}
+
+void renderBackground() {
+    SDL_Rect fillScreen = {0, 0, 640, 480};
+    SDL_SetRenderDrawColor(ren, 0x00, 0x00, 0x00, 0x00);
+    SDL_RenderFillRect(ren, &fillScreen); SDL_SetRenderDrawColor(ren, 0xFF, 0x00, 0x00, 0x00);
+    for (int i = 0; i <= 480; i = i + 20)        SDL_RenderDrawLine(ren, 0, i, 640, i);
+    for (int i = 0; i <= 640; i = i + 20)
+        SDL_RenderDrawLine(ren, i, 0, i, 640);
+        
+    SDL_RenderPresent(ren);
+}
 void Game_Start()
 {
     if (welcome() == false)
@@ -104,7 +136,48 @@ void renderImage(const std::string imagefile, int x, int y) {
     SDL_QueryTexture(tex, NULL, NULL, &pos.w, &pos.h);
     SDL_RenderCopy(ren, tex, NULL, &pos);
 }
-    
+
+
+bool start() {
+    renderBackground();
+    bool running = true;
+    int length = 2;
+    int x = 0;
+    int y = 0;
+    while (running == true) {
+        SDL_Event event;       
+        while(SDL_PollEvent(&event)) {
+            if (event.type == SDL_KEYDOWN) {
+                switch(event.key.keysym.sym)
+                {
+                case SDLK_UP:
+                    renderRect(x, y-20);
+                    y-=20;
+                    break;
+                case SDLK_DOWN:
+                    renderRect(x,y+20);
+                    y+=20;
+                    break;
+                case SDLK_RIGHT:
+                    renderRect(x+20, y);
+                    x+=20;
+                    break;
+                case SDLK_LEFT:
+                    renderRect(x-20, y);
+                    x-=20;
+                    break;
+                case SDLK_RETURN:break;
+                default: break;
+                };
+            }
+            if (event.type == SDL_QUIT) {
+                running = false;
+            }
+        }
+    }
+    return running;
+}
+
 
 bool welcome()
 {
@@ -112,7 +185,7 @@ bool welcome()
     renderFont("+Start game", color[black], 30, 350, 300, 200, 50);
     renderFont("-Quit game", color[black], 30, 350, 340, 200, 50);
     SDL_RenderPresent(ren);
-    int choice = 0;
+    int choice = 1;
     while(1) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
